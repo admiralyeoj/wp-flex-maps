@@ -108,4 +108,8 @@ dist
 package-lock.json
 
 .DS_Store
+<<<<<<< HEAD
 package-lock.json
+=======
+package-lock.json
+>>>>>>> fce155a654c49a07aa3f90fdaee5437bb0f7f2e5

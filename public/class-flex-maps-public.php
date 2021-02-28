@@ -72,7 +72,7 @@ class Flex_Maps_Public {
 	public function enqueue_scripts($hook) {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'dist/js/index.min.js', array( 'jquery' ), $this->version, false );
 
-    wp_enqueue_script( $this->plugin_name.'-map-api', 'https://maps.googleapis.com/maps/api/js?key='.FLEX_MAPS_BROWSER_API_KEY.'&callback=FM_Init_Map&libraries=places', array( $this->plugin_name ), $this->version, true );
+    wp_enqueue_script( $this->plugin_name.'-map-api', 'https://maps.googleapis.com/maps/api/js?key='.FLEX_MAPS_BROWSER_API_KEY.'&callback=FM_Init_Map&libraries=places', array( 'jquery', $this->plugin_name ), $this->version, true );
     
     $javascript_data = array(
       'file_path' => FLEX_MAPS_PLUGIN_PATH.'public/',

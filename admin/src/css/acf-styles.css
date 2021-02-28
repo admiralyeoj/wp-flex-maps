@@ -1,0 +1,47 @@
+/* Remove Number Arrows */
+.fm-remove-arrows input[type=number]::-webkit-inner-spin-button, 
+.fl-remove-arrows input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ACF Group CSS */
+.fm-logic-group .acf-icon.-plus { border-color: transparent; background: transparent; }
+.fm-logic-group .acf-table { border: 0 none }
+.fm-logic-group .acf-table>tbody>tr>td,
+.fm-logic-group .acf-table>tbody>tr>th,
+.fm-logic-group .acf-table>thead>tr>td,
+.fm-logic-group .acf-table>thead>tr>th { border: 0 none; padding: 4px }
+
+.fm-rule-group {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* Repeater CSS */
+.fm-logic-group .acf-repeater .acf-row-handle.order, 
+.fm-logic-group .acf-repeater .acf-row-handle.remove { background: #fff; }
+
+.fm-logic-group .acf-actions { text-align: left; }
+.fm-logic-group .acf-repeater .acf-table tbody tr td.remove a.-plus { visibility: hidden !important }
+.fm-rule-group .acf-repeater .acf-actions a.acf-button { display: none; }
+
+
+
+/* Rule Group (Inner Repeater) */
+.fm-logic-group .acf-repeater .acf-table tbody tr:first-child td.fm-rule-group .acf-repeater .acf-table tbody tr:first-child td.remove a.-minus { visibility: hidden !important }
+
+/*.fm-logic-group .acf-repeater table tbody tr .acf-actions:before { content: "or"; font-weight: 600; }
+*/.fm-logic-group .acf-repeater .acf-table thead { display: none; }
+.fm-logic-group .acf-repeater .acf-table tbody tr td.acf-row-handle.remove { visibility: hidden; }
+.fm-rule-group .acf-repeater .acf-table tbody tr td.acf-row-handle.remove { visibility: visible; }
+.fm-logic-group .acf-repeater .acf-table tbody tr td.acf-row-handle:first-child,
+.fm-logic-group .acf-repeater .acf-table thead tr th.acf-row-handle:first-child { display: none; }
+.fm-logic-group .acf-repeater>table{    background: transparent;}
+.fm-logic-group td.acf-field-select:nth-of-type(2){width: 40%;}
+.fm-logic-group .acf-field-select:nth-of-type(3){width: 15%;}
+.fm-logic-group .acf-field-select:nth-of-type(4){width: 35%;}
+.fm-logic-group .fm-add-btn{width: 1px;}
+
+.fm-logic-group .acf-table tr.acf-row .acf-row-handle.order { pointer-events: none; }
+.fm-logic-group h4 { margin-top: 10px; margin-bottom: 0; }
+
+.fm-logic-group .acf-table tr.acf-row .acf-row-handle.remove { height: 30px; position: absolute; padding-left: 3px; background: transparent; }

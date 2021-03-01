@@ -19,7 +19,6 @@ import { FM_Google_Map } from './../../../includes/js/FM-Google-Map.js';
 })( jQuery );
 
 window.FM_Init_Map = () => {
-  console.log(google);
   let location_input =  document.querySelectorAll('.fm-autocomplete');
   for (let i = 0; i < location_input.length; i++) {
     new google.maps.places.Autocomplete(location_input[i]);

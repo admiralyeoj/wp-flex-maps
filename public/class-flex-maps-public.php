@@ -264,12 +264,6 @@ class Flex_Maps_Public {
     $args = $query->get('location_search');
     if(!empty($args) && $args['search_type'] != 'geocode') {
 
-      if($args['search_type'] == 'state' && (empty($args['compare']) || $args['compare'] == '=')) {
-        $states = get_state_array_name_abbr();
-        $tmp_search = ucwords(strtolower($args['search']));
-        $args['search'] = !empty($states[$tmp_search]) ? $states[$tmp_search] : $args['search'];
-      }
-
       $meta_query = !empty($query->get('meta_query')) ? $query->get('meta_query') : array();
       $meta_query['compare'] = 'AND';
       $meta_query[] = array(

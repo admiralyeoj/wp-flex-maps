@@ -106,7 +106,7 @@ class Flex_Maps {
     /**
      * includes the helper functions to get data across site
      */
-    require_once FLEX_MAPS_PLUGIN_DIR . 'includes/helper-functions.php';
+    require_once FLEX_MAPS_PLUGIN_DIR . 'includes/api/helper-functions.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -191,7 +191,7 @@ class Flex_Maps {
 
 		$plugin_admin = new Flex_Maps_Admin( $this->get_plugin_name(), $this->get_version() );
     $global_settings = new Flex_Maps_Global_Setting();
-    $settings = new Flex_Maps_Settings();
+    $settings = new Flex_Maps_Settings($this->get_plugin_name(), $this->get_version());
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -203,10 +203,11 @@ class Flex_Maps {
 
 
     $this->loader->add_action( 'add_meta_boxes', $settings, 'example_map_section' );
-    $this->loader->add_filter( 'acf/load_field/key=fm_field_rule_meta_key', $settings, 'load_select_custom_fields');
+    $this->loader->add_filter( 'acf/load_field/key=fm_field_rule_meta_key', $settings, 'load_fm_meta_keys');
+    $this->loader->add_action( 'acf/prepare_field/key=field_603b1807fa739', $settings, 'load_search_values');
 
     $this->loader->add_action( 'acf/prepare_field/key=fm_repeater_rule_group', $settings, 'load_rule_group_repeater');
-    $this->loader->add_action( 'acf/prepare_field/key=fm_field_rule_meta_value', $settings, 'load_fm_rule_meta_values');
+    $this->loader->add_action( 'acf/prepare_field/key=fm_field_rule_meta_value', $settings, 'load_fm_meta_values');
     $this->loader->add_action( 'acf/render_field/type=repeater', $settings, 'rule_group_repeater_before', 5);
     $this->loader->add_action( 'acf/render_field/key=fm_repeater_rule_group', $settings, 'rule_group_repeater_after', 15);
 

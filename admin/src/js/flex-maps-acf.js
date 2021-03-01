@@ -7,6 +7,7 @@ var _self = this;
     if (typeof acf == 'undefined') { return; }
 
     $(document).on('change ready', '.fm-rule-meta-key .acf-input select', function(e) {
+      console.log('test');
       update_field_values_on_select_change(e, $);
     });
 

@@ -34,8 +34,8 @@ class Flex_Maps_Single_Location_Fields extends Flex_Maps_Fields {
       'fields' => $fields,
       'location' => $location,
       'menu_order' => 0,
-      'position' => 'normal',
-      'style' => 'seamless',
+      'position' => 'high',
+      'style' => 'default',
       'label_placement' => 'top',
       'instruction_placement' => 'label',
       'hide_on_screen' => '',
@@ -157,7 +157,7 @@ class Flex_Maps_Single_Location_Fields extends Flex_Maps_Fields {
         ),
       )
     );
-    $fields = apply_filters('fm_location_fields_address', $fields, 'flex-maps');
+    $fields = apply_filters('fm_location_fields_address', $fields);
     wp_cache_set('fm_location_fields_address', $fields, 'flex-maps');
 
     return $fields;
@@ -195,9 +195,9 @@ class Flex_Maps_Single_Location_Fields extends Flex_Maps_Fields {
     if($fields = wp_cache_get('fm_single_location_fields', 'flex-maps'))
       return $fields;
 
-    $general_fields = self::get_general_fields();
-    $address_fields = self::get_address_fields();
-    $extra_fields = self::get_extra_fields();
+    $general_fields = self::get_general_fields() ?: array();
+    $address_fields = self::get_address_fields() ?: array();
+    $extra_fields = self::get_extra_fields() ?: array();
 
     $location = self::get_field_location();
 

@@ -6,7 +6,7 @@
 
   <p><?= $data['street_address_1'] ?></p>
   <p><?= $data['street_address_2'] ?></p>
-  <p><?= $data['city'] ?>, <?= $data['state'] ?> <?= $data['zip'] ?></p>  
+  <p><?= $data['city'] ?>, <?= $data['state'] ?> <?= $data['postal_code'] ?></p>  
   <p><a href="tel:<?= preg_replace('/[^0-9]/', '', $data['phone']) ?>"><?= $data['phone'] ?></a></p>
 
   <a href="<?= $link ?>" target="_blank">View Location</a>

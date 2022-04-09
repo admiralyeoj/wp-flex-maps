@@ -31,14 +31,15 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
 
   /* On Load Map Functions */
   protected function register_default_map_settings() {
-    $load_types     = $this->get_load_type_fields();
-    $latlng_fields  = $this->get_latlng_fields();
-    $custom_fields  = $this->get_fields_fields();
+    
+    $general_tab = $this->get_general_tab();
+    $filter_tab = $this->get_filter_tab();
+    $merge_array = array_merge($general_tab, $filter_tab);
 
     acf_add_local_field_group(array(
       'key' => 'fm_group_default_map_settings',
       'title' => 'Default Map Settings',
-      'fields' => array($load_types, $latlng_fields, $custom_fields),
+      'fields' => $merge_array,
       'location' => array(
         array(
           array(
@@ -59,6 +60,48 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
     ));
   }
 
+  protected function get_general_tab() {
+    $general_tab = array(
+      'key' => 'fm_general_tab',
+      'label' => 'General',
+      'name' => '',
+      'type' => 'tab',
+      'placement' => 'left',
+    );
+
+    $load_types     = $this->get_load_type_fields();
+    $latlng_fields  = $this->get_latlng_fields();
+    $custom_fields  = $this->get_fields_fields();
+
+    return array($general_tab, $load_types, $latlng_fields, $custom_fields);
+  }
+
+  protected function get_filter_tab() {
+    $filter_tab = array(
+      array(
+        'key' => 'fm_filter_tab',
+        'label' => 'Filter',
+        'name' => '',
+        'type' => 'tab',
+        'conditional_logic' => array(
+          array(
+            array(
+              'field' => 'fm_field_load_type',
+              'operator' => '!=',
+              'value' => 'static',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // $address = $this->get_address_filter_fields();
+    $custom = $this->get_custom_filter_fields();
+    $tax = $this->get_taxonomy_filter_fields();
+
+    return array_merge($filter_tab, $custom, $tax);
+  }
+
   protected function get_load_type_fields() {
     return array(
       'key' => 'fm_field_load_type',
@@ -68,7 +111,7 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
       'choices' => array(
         'all' => 'All Locations',
         'latlng' => 'Set Latitude and Longitude',
-        'fields' => 'Search Custom Fields',
+        'static' => 'Static Search',
       ),
     );
   }
@@ -179,7 +222,7 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
           array(
             'field' => 'fm_field_load_type',
             'operator' => '==',
-            'value' => 'fields',
+            'value' => 'static',
           ),
         ),
       ),
@@ -230,21 +273,20 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
                     'class' => 'fm-rule-meta-compare',
                   ),
                   'choices' => array(
-                    '=' => 'is equal to',
-                    '!=' => 'is not equal to',
+                    '=' => '=',
+                    '!=' => '!=',
+                    '>' => '>',
+                    '<' => '<',
+                    '<=' => '<=',
+                    '>=' => '>=',
+                    'LIKE' => 'LIKE',
                   ),
                 ),
                 array(
                   'key' => 'fm_field_rule_meta_value',
-                  'label' => '35',
+                  'label' => '',
                   'name' => 'value',
-                  'type' => 'select',
-                  'wrapper' => array(
-                    'width' => '',
-                    'class' => 'fm-rule-meta-value',
-                  ),
-                  'choices' => array(
-                  ),
+                  'type' => 'text',
                 ),
                 array(
                   'key' => 'fm_message_add_new_row',
@@ -269,5 +311,151 @@ class Flex_Maps_Setting_Fields extends Flex_Maps_Fields {
   }
 
   /* End On Load Map Functions */
+
+  public function get_address_filter_fields() {
+    if($fields = wp_cache_get('fm_setting_address_filter_fields'))
+      return $fields;
+
+    $fields = array(
+      array(
+        'key' => 'fm_enable_address_seach_param',
+        'label' => 'Address Search',
+        'name' => 'allow_address_search',
+        'type' => 'true_false',
+        'wrapper' => array(
+          'width' => '50',
+        ),
+        'message' => 'Enables address search',
+      ),
+      array(
+        'key' => 'fm_address_seach_param',
+        'label' => 'Address Search Parameter',
+        'name' => 'address_search_parameter',
+        'type' => 'text',
+        'conditional_logic' => array(
+          array(
+            array(
+              'field' => 'fm_enable_address_seach_param',
+              'operator' => '==',
+              'value' => '1',
+            ),
+          ),
+        ),
+        'wrapper' => array(
+          'width' => '50',
+        ),
+        'placeholder' => 'fm-search',
+      ),
+    );
+
+    $fields = apply_filters('fm_global_settings_address_fields_filter', $fields);
+    wp_cache_add('fm_setting_address_filter_fields', $fields);
+
+    return $fields;
+  }
+
+  public function get_custom_filter_fields() {
+    if($fields = wp_cache_get('fm_setting_custom_filter_fields'))
+      return $fields;
+
+    $fields = array(
+      array(
+        'key' => 'fm_search_param_list',
+        'label' => 'Custom Fields',
+        'name' => 'fm_parameter_list',
+        'type' => 'repeater',
+        'layout' => 'table',
+        'button_label' => '',
+        'sub_fields' => array(
+          array(
+            'key' => 'fm_custom_param_field',
+            'label' => 'Parameter',
+            'name' => 'parameter',
+            'type' => 'select',
+            'choices' => array(
+            ),
+            'return_format' => 'value',
+            'wrapper' => array(
+              'class' => 'custom-fields',
+            ),
+          ),
+          array(
+            'key' => 'fm_custom_param_name',
+            'label' => 'Search Parameter',
+            'name' => 'search_parameter',
+            'type' => 'text',
+            'required' => 1,
+          ),
+          array(
+            'key' => 'fm_custom_param_value',
+            'label' => 'Default Value',
+            'name' => 'search_value',
+            'type' => 'text',
+          ),
+        ),
+      ),
+    );
+
+    $fields = apply_filters('fm_global_settings_custom_fields_filter', $fields);
+    wp_cache_add('fm_setting_custom_filter_fields', $fields);
+
+    return $fields;
+  }
+
+  public function get_taxonomy_filter_fields() {
+    if($fields = wp_cache_get('fm_setting_taxonomy_fields_filter'))
+      return $fields;
+
+    $fields = array(
+      array(
+        'key' => 'fm_search_taxonomy_param_list',
+        'label' => 'Taxonomies',
+        'name' => 'fm_taxonomy_list',
+        'type' => 'repeater',
+        'layout' => 'table',
+        'button_label' => '',
+        'wrapper' => array(
+          'class' => 'fm-tax-rule-group',
+        ),
+        'sub_fields' => array(
+          array(
+            'key' => 'fm_taxonomy_param_field',
+            'label' => 'Parameter',
+            'name' => 'parameter',
+            'type' => 'select',
+            'choices' => array(
+            ),
+            'return_format' => 'value',
+            'wrapper' => array(
+              'class' => 'taxonomies fm-rule-taxonomy-key',
+            ),
+          ),
+          array(
+            'key' => 'fm_taxonomy_param_name',
+            'label' => 'Search Parameter',
+            'name' => 'search_parameter',
+            'type' => 'text',
+            'required' => 1,
+          ),
+          array(
+            'key' => 'fm_taxonomy_param_value',
+            'label' => 'Default Value',
+            'name' => 'search_value',
+            'type' => 'select',
+            'choices' => array(),
+            'wrapper' => array(
+              'class' => 'fm-tax-rule-row',
+            ),
+            'allow_null' => true,
+          ),
+        ),
+      ),
+    );
+
+    $fields = apply_filters('fm_global_settings_taxonomy_fields_filter', $fields);
+    wp_cache_add('fm_setting_taxonomy_fields_filter', $fields);
+
+    return $fields;
+  }
     
 }

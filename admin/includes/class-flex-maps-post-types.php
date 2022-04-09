@@ -75,7 +75,7 @@ class Flex_Maps_Post_Types {
 
     $rewrite = array(
       'slug'                  => 'locations',
-      'with_front'            => true,
+      'with_front'            => false,
       'pages'                 => true,
       'feeds'                 => true,
     );
@@ -83,12 +83,12 @@ class Flex_Maps_Post_Types {
     $args = array(
       'label'                 => __( 'Location', 'flex_maps' ),
       'labels'                => $labels,
-      'supports'              => array( 'title', 'editor', 'thumbnail', 'page-attributes' ),
-      'hierarchical'          => true,
+      'supports'              => array( 'title', 'thumbnail' ),
+      'hierarchical'          => false,
       'public'                => true,
       'show_ui'               => true,
-      'show_in_menu'          => 'edit.php?post_type=flex_maps',
-      'menu_position'         => 25,
+      'show_in_menu'          => true, //'edit.php?post_type=flex_maps',
+      'menu_position'         => 5,
       'menu_icon'             => 'dashicons-location',
       'show_in_admin_bar'     => true,
       'show_in_nav_menus'     => true,
@@ -106,6 +106,65 @@ class Flex_Maps_Post_Types {
     $args = apply_filters('fm_post_type_args', $args);
     
     register_post_type( 'fm_locations', $args );
+  }
+
+  public function register_stylist_post_type() {
+    $labels = array(
+      'name'                  => _x( 'Stylists', 'Post Type General Name', 'flex_maps' ),
+      'singular_name'         => _x( 'Stylist', 'Post Type Singular Name', 'flex_maps' ),
+      'menu_name'             => __( 'Stylists', 'flex_maps' ),
+      'name_admin_bar'        => __( 'Stylists', 'flex_maps' ),
+      'archives'              => __( 'Stylist Archives', 'flex_maps' ),
+      'attributes'            => __( 'Stylist Attributes', 'flex_maps' ),
+      'parent_item_colon'     => __( 'Parent Stylist:', 'flex_maps' ),
+      'all_items'             => __( 'Stylists', 'flex_maps' ),
+      'add_new_item'          => __( 'Add New Stylist', 'flex_maps' ),
+      'add_new'               => __( 'Add New', 'flex_maps' ),
+      'new_item'              => __( 'New Stylist', 'flex_maps' ),
+      'edit_item'             => __( 'Edit Stylist', 'flex_maps' ),
+      'update_item'           => __( 'Update Stylist', 'flex_maps' ),
+      'view_item'             => __( 'View Stylist', 'flex_maps' ),
+      'view_items'            => __( 'View Stylist', 'flex_maps' ),
+      'search_items'          => __( 'Search Stylist', 'flex_maps' ),
+      'not_found'             => __( 'Not found', 'flex_maps' ),
+      'not_found_in_trash'    => __( 'Not found in Trash', 'flex_maps' ),
+      'featured_image'        => __( 'Featured Image', 'flex_maps' ),
+      'set_featured_image'    => __( 'Set featured image', 'flex_maps' ),
+      'remove_featured_image' => __( 'Remove featured image', 'flex_maps' ),
+      'use_featured_image'    => __( 'Use as featured image', 'flex_maps' ),
+      'insert_into_item'      => __( 'Insert into Stylist', 'flex_maps' ),
+      'uploaded_to_this_item' => __( 'Uploaded to this Stylist', 'flex_maps' ),
+      'items_list'            => __( 'Stylists list', 'flex_maps' ),
+      'items_list_navigation' => __( 'Stylists list navigation', 'flex_maps' ),
+      'filter_items_list'     => __( 'Filter Stylists list', 'flex_maps' ),
+    );
+
+    $args = array(
+      'label'                 => __( 'Stylist', 'flex_maps' ),
+      'labels'                => $labels,
+      'supports'              => array( 'title', 'thumbnail' ),
+      'hierarchical'          => false,
+      'public'                => false,
+      'show_ui'               => true,
+      'show_in_menu'          => 'edit.php?post_type=fm_locations',
+      'menu_position'         => 5,
+      'menu_icon'             => 'dashicons-location',
+      'show_in_admin_bar'     => true,
+      'show_in_nav_menus'     => true,
+      'can_export'            => true,
+      'has_archive'           => false,
+      'exclude_from_search'   => true,
+      'publicly_queryable'    => true,
+      'rewrite'               => false,
+      'capability_type'       => 'page',
+      'show_in_rest'          => true,
+    );
+
+    $labels = apply_filters('fm_stylist_post_type_labels', $labels);
+    $rewrite = apply_filters('fm_stylist_post_type_rewrite', $rewrite);
+    $args = apply_filters('fm_stylist_post_type_args', $args);
+    
+    register_post_type( 'fm_stylist', $args );
   }
 
   // Register Custom Post Type

@@ -6,13 +6,15 @@
   </style>
 <?php endif; ?>
 
-<form action="" action="GET">
-  <input type="text" class="fm-autocomplete" name="fm-search" value="" autocomplete="off">
-  <button type="submit">Submit</button>
-</form>
-
+<?php do_action('fm_start_map', $id, $unique_id); ?>
 <div class="fm-map-container">
-  <div id="<?= $unique_id ?>" data-map="<?= $mapId ?>" class="fm-google-map flex-map-<?= $mapId ?>" data-load-type="<?= $load_type ?>" <?php foreach ($attributes as $key => $attr) { echo " data-{$key}='".html_entity_decode($attr)."' "; } ?>>
-    <span class="fm-spinner"></span>
+  <div class="fm-spinner-container">
+    <span class="fm-spinner"><div></div><div></div></span>
   </div>
+  <?php do_action('fm_before_map', $id, $unique_id); ?>
+  <div id="<?= $unique_id ?>" data-map="<?= $mapId ?>" class="fm-google-map flex-map-<?= $mapId ?>" data-load-type="<?= $load_type ?>" <?php foreach ($attributes as $key => $attr) { echo " data-{$key}='".html_entity_decode($attr)."' "; } ?>>
+    <?php do_action('fm_inside_map', $id, $unique_id); ?>
+  </div>
+  <?php do_action('fm_after_map', $id, $unique_id); ?>
 </div>
+<?php do_action('fm_end_map', $id, $unique_id); ?>

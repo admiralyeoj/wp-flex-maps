@@ -1,6 +1,4 @@
 <?php
-global $fm_rule_group_index, $fm_rule_row_index;
-$fm_rule_group_index = $fm_rule_row_index = null;
 
 /**
  * Defines the custom post types needed
@@ -41,9 +39,15 @@ class Flex_Maps_Settings {
    */
   private $version;
 
+  protected $validate_fields;
+
+  protected $index;
+
   public function __construct( $plugin_name, $version ) {
     $this->plugin_name = $plugin_name;
     $this->version = $version;
+
+    $this->validate_fields = $this->index = array();
   }
 
   public function example_map_section() {
@@ -93,126 +97,78 @@ class Flex_Maps_Settings {
     return $field; 
   }
 
-  function load_search_values( $field ) {
-    if($choices = wp_cache_get("fm_search_values_{$field['key']}", $this->plugin_name)){
-      $field['choices'] = $choices;
+  public function load_rule_tax_group_repeater($field) {
+    if(strpos($field['wrapper']['class'], 'fm-tax-rule-group') === false)
+      return $field;
+
+    $key = $field['key'];
+
+    if(!isset($this->index[$key]['index'])) {
+      $this->index[$key]['index'] = -1;
       return $field;
     }
 
-    // reset choices
-    $field['choices'] = array();
-    
-    $all_fields = Flex_Maps_Single_Location_Fields::get_single_location_fields();
-    $label = '';
-
-    if(!empty($all_fields)) {
-      foreach($all_fields as $row) {
-        if(empty($row['name'])) {
-          $label = $row['label'];
-          continue;
-        }
-
-        $field['choices'][$label][$row['name']] = $row['label'];
-      }
-    }
-
-    $taxonomies = get_object_taxonomies('fm_locations', 'object');
-    if(!empty($taxonomies)) {
-      foreach ($taxonomies as $tax) {
-        $field['choices']['Taxonomies'][$tax->name] = "{$tax->labels->singular_name} ({$tax->name})";
-      }
-    }
-
-    wp_cache_set("fm_search_values_{$field['key']}", $field['choices'], $this->plugin_name);
-    return $field;
-  }
-
-  public function load_rule_group_repeater($field) {
-    global $fm_rule_group_index, $fm_rule_row_index;
-
-    if(!isset($fm_rule_group_index)) {
-      $fm_rule_group_index = -1;
-      return $field;
-    }
-
-    $fm_rule_row_index = null;
-    $fm_rule_group_index++;
+    $this->index[$key]['index']++;
+    unset($this->index[$key]['row']);
 
     return $field;
   }
 
-  public function load_fm_meta_values($field) {
-    global $post, $fm_rule_group_index, $fm_rule_row_index;
-    if(!isset($fm_rule_row_index)) {
-      $fm_rule_row_index = 0;
+  public function load_fm_tax_values($field) {
+    $key = $field['key'];
+    $parent = $field['parent'];
+    $post_id = get_the_ID();
 
+    // echo '<pre>';print_r($this->index);echo '</pre>';
+
+    if(strpos($field['wrapper']['class'], 'fm-tax-rule-row') === false)
       return $field;
-  }
-    
-    //group_index = $fm_rule_group_index; //wp_cache_get('fm_rule_group_index', $this->plugin_name);
-    $filter = get_post_meta($post->ID, "fm_load_type_fields_rule_container_{$fm_rule_group_index}_rule_group_{$fm_rule_row_index}_key", true);
-    $field_group = Flex_Maps_Single_Location_Fields::get_single_location_fields();
 
-    // if filter is empty. Gets the first field with the name value entered
+    if(!isset($this->index[$key]['row'])) {
+      $this->index[$key]['row'] = 0;
+      return $field;
+    }
+
+    $filter = get_post_meta($post_id, "fm_taxonomy_list_{$this->index[$key]['row']}_parameter", true);
+
     if(empty($filter)) {
-      foreach ($field_group as $row) {
-        if(!empty($row['name'])) {
-          $filter = $row['name'];
-          break;
-        }
-      }
+      $taxonomies = get_object_taxonomies('fm_locations', 'object');
+      $tax = reset($taxonomies);
+      $filter = $tax->name;
     }
 
-    $options = $this->get_filter_fields($filter);
-    $tmp_field = $choices = array();
+    $terms = get_terms( $filter, array(
+      'hide_empty' => false,
+    ) );
 
-    foreach($field_group as $row) {
-      if($row['name'] == $filter) {
-        $tmp_field = $row;
-        break;
+    if($terms) {
+      foreach($terms as $term) {
+        $choices[$term->slug] = $term->name;
       }
-    }
- 
-    if(!empty($tmp_field['choices'])) {
-      foreach($options as $val) {
-        $choices[$val] = $tmp_field['choices'][$val];
-      }
-    } else {
-      foreach($options as $val) {
-        $choices[$val] = $val;
-      }
-    }
-    $field['choices'] = $choices;
 
-    $fm_rule_row_index++;
+      $field['choices'] = $choices; 
+    }
+
+    $this->index[$key]['row']++;
     return $field;
   }
 
-  function ajax_load_fm_rule_meta_values( ) {
-    if (!wp_verify_nonce($_POST['nonce'], 'acf_nonce')) {
+  function ajax_load_fm_rule_tax_values( ) {
+    if (!wp_verify_nonce($_POST['nonce'], 'acf_nonce') || empty($_POST['key'])) {
       die();
     }
 
-    $options = $this->get_filter_fields($_POST['key']);
-    $field_group = Flex_Maps_Single_Location_Fields::get_single_location_fields();
-    $tmp_field = $choices = array();
+    $terms = get_terms( $_POST['key'], array(
+      'hide_empty' => false,
+    ) );
 
-    foreach($field_group as $row) {
-      if($row['name'] == $_POST['key']) {
-        $tmp_field = $row;
-        break;
-      }
-    }
-
-    if(!empty($tmp_field['choices'])) {
-      foreach($options as $val) {
+    if($terms) {
+      foreach($terms as $term) {
         $choices[] = array(
-          'label' => $tmp_field['choices'][$val],
-          'value' => $val,
+          'label' => $term->name,
+          'value' => $term->slug,
         );
       }
-    } else {
-      $choices = $options;
     }
 
     if(empty($choices))
@@ -230,7 +186,7 @@ class Flex_Maps_Settings {
     $sql = $wpdb->prepare("SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value != '' ORDER BY meta_value", $meta_key);
     $values = $wpdb->get_col($sql);
 
-    return $values;
+    return $return;
   }
 
   public function rule_group_repeater_before( $field ) {
@@ -242,6 +198,95 @@ class Flex_Maps_Settings {
 
   public function rule_group_repeater_after( $field ) {
     echo '<h4>or</h4>';
+  }
+
+  public function load_param_values( $field ) {
+    // echo '<pre>';print_r($field); echo '</pre>';
+    if(strpos($field['wrapper']['class'], 'custom-fields') !== false) {
+      $field['choices'] = $this->get_custom_fields();
+    } else if(strpos($field['wrapper']['class'], 'taxonomies') !== false) {
+      $field['choices'] = $this->get_taxonomy_types();
+    }
+    
+    return $field;
+  }
+
+  public function validate_field( $valid, $value, $field, $input_name ) {
+    if( $valid !== true ) {
+        return $valid;
+    }
+    $name = $field['name'];
+
+    if(!isset($this->validate_fields[$name])) {
+      $this->validate_fields[$name] = array($value);
+      return $valid;
+    }
+
+    if(!empty($this->validate_fields[$name]) && in_array($value, $this->validate_fields[$name])) {
+      return __( "Only one use allowed.", 'flex-maps' );
+    }
+
+    $this->validate_fields[$name][] = $value;
+    
+    return $valid;
+  }
+
+  public function maybe_disable_taxonomy_filter( $field ) {
+    $display = true;
+
+    $taxonomies = get_object_taxonomies('fm_locations');
+    if($display && empty($taxonomies))
+      $display = false;
+
+    if(apply_filters('maybe_disable_taxonomy_filter', $display))
+      return $field;
+    else
+      return false;
+  }
+
+  private function get_custom_fields() {
+    if($choices = wp_cache_get("fm_search_values_{$field['key']}", $this->plugin_name)){
+      return $choices;
+    }
+
+    $choices = array();
+
+    $choices['Address Search Fields'] = array('id' => 'Post ID', 'address'=>'Address', 'radius'=>'Radius');
+    
+    $all_fields = Flex_Maps_Single_Location_Fields::get_single_location_fields();
+    $label = '';
+
+    if(!empty($all_fields)) {
+      foreach($all_fields as $row) {
+        if(empty($row['name'])) {
+          $label = $row['label'];
+          continue;
+        }
+
+        $choices[$label][$row['name']] = $row['label'];
+      }
+    }
+
+    wp_cache_set("fm_search_values_{$field['key']}", $choices, $this->plugin_name);
+    return $choices;
+  }
+
+  private function get_taxonomy_types() {
+    if($choices = wp_cache_get("fm_taxonomy_search_values_{$field['key']}", $this->plugin_name)){
+      return $choices;
+    }
+
+    $choices = array();
+
+    $taxonomies = get_object_taxonomies('fm_locations', 'object');
+    if(!empty($taxonomies)) {
+      foreach ($taxonomies as $tax) {
+        $choices[$tax->name] = "{$tax->labels->singular_name} ({$tax->name})";
+      }
+    }
+
+    wp_cache_set("fm_taxonomy_search_values_{$field['key']}", $choices, $this->plugin_name);
+    return $choices;
   }
 
 }

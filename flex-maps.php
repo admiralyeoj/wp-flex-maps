@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Flex Maps
  * Plugin URI:        https://www.ignitro.com/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       A flexable map solution that allows versitial map functionality while allowing basic controlls to the average wordpress developer
  * Version:           1.0.0
  * Author:            Ignitro
  * Author URI:        https://www.ignitro.com/

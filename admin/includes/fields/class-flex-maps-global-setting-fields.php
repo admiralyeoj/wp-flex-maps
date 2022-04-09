@@ -50,26 +50,33 @@ class Flex_Maps_Global_Setting_Fields extends Flex_Maps_Fields {
 
   }
 
-  public static function get_settings_fields() {
+  public function get_settings_fields() {
     if($fields = wp_cache_get('fm_setting_fields_general'))
       return $fields;
 
     $fields = array(
       '1.0' => array(
+        'key' => 'fm_tab_general',
+        'label' => 'General',
+        'name' => '',
+        'type' => 'tab',
+        'placement' => 'left',
+      ),
+      '1.1' => array(
         'key' => 'fm_field_option_browser_key',
         'label' => 'Google Maps Browser Key',
-        'name' => 'fm_google_maps_browser_key',
+        'name' => 'google_maps_browser_key',
         'type' => 'text',
         'instructions' => 'Restrict key using site URL',
       ),
-      '1.1' => array(
+      '1.2' => array(
         'key' => 'fm_field_option_server_key',
         'label' => 'Google Maps Server Key',
-        'name' => 'fm_google_maps_server_key',
+        'name' => 'google_maps_server_key',
         'type' => 'text',
         'instructions' => 'Restrict this key using the servers IP',
       ),
-      '1.2' => array(
+      '1.3' => array(
         'key' => 'fm_field_option_radius',
         'label' => 'Radius',
         'name' => 'radius',
@@ -83,6 +90,8 @@ class Flex_Maps_Global_Setting_Fields extends Flex_Maps_Fields {
 
     return $fields;
   }
+
+  
 
   public static function get_field_location() {
     if($location = wp_cache_get('fm_global_settings_fields_location'))

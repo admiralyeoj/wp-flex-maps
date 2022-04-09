@@ -1,5 +1,5 @@
 export class FM_Google_Map {
-  constructor(element) {
+  constructor(element, query = []) {
     this.valid = true;
     if(!element){
       this.valid = false;
@@ -12,6 +12,9 @@ export class FM_Google_Map {
 
     this.element = element;
     this.mapId = this.element.getAttribute("data-map");
+    this.meta_vars = query['meta_vars'] || [];
+    this.tax_vars = query['tax_vars'] || [];
+    this.initialZoom = true;
 
     this.myOptions = {
       zoom: 4,
@@ -24,27 +27,32 @@ export class FM_Google_Map {
       dom.classList.add("fm-marker");
     });
 
-    /*let bounds = new google.maps.LatLngBounds(new google.maps.LatLng(18.7763, 170.5957),
-        new google.maps.LatLng(71.5388001, -66.885417));*/
-
     this.map = new google.maps.Map(element, {
       center: { lat: 0, lng: 0 },
       zoom: 1,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.LEFT_BOTTOM,
+      },
+      fullscreenControl: true,
+      fullscreenControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
+      mapTypeControl: false,
+      streetViewControl: false,
+      scaleControl: false,
     });
 
     google.maps.event.addListener(this.map, 'zoom_changed', function() {
-    var zoomChangeBoundsListener = 
-      google.maps.event.addListener(_self.map, 'bounds_changed', function(event) {
-        if (this.getZoom() > 17 && this.initialZoom == true) {
-          // Change max/min zoom here
-          this.setZoom(17);
-          this.initialZoom = false;
-        }
-      google.maps.event.removeListener(zoomChangeBoundsListener);
+      var zoomChangeBoundsListener = 
+        google.maps.event.addListener(_self.map, 'bounds_changed', function(event) {
+          if (this.getZoom() > 17 && _self.initialZoom == true) {
+            this.setZoom(17);
+            _self.initialZoom = false;
+          }
+        google.maps.event.removeListener(zoomChangeBoundsListener);
+      });
     });
-  });
-
-    // this.map.fitBounds(bounds);
 
     if(this.element.getAttribute("data-load-type") == 'latlng')
       this.load_by_latlng();
@@ -56,25 +64,38 @@ export class FM_Google_Map {
     let _self = this;
     if(!this.valid)
       return;
-
+    
     var data = {
       'action': 'flex_maps_get_locations',
       'mapId' : this.mapId,
+      'meta_vars': this.meta_vars,
+      'tax_vars': this.tax_vars,
     };
 
     jQuery.post(flex_map.ajax_url, data, function(response) {
       let data = response.data;
+      jQuery(_self.element).siblings('.fm-spinner-container').fadeOut();
 
       if(response.success) {
-        // _self.map.initialZoom = true;
-        // _self.clear_markers();
+        let bounds = new google.maps.LatLngBounds();
 
         if(!data.locations || data.locations.length == 0) {
-          // _self.CurrentLocation(response['lat'], response['lng'], bounds);
-          // _self.AltText(response['error']);
-        } else {
-          let bounds = new google.maps.LatLngBounds();
+          let loc = {
+            lat: data['origin']['geometry']['location']['lat'],
+            lng: data['origin']['geometry']['location']['lng'],
+            ID: 'origin',
+            title: 'Current Location',
+            marker_html: data['origin']['html'],
+          };
 
+          var latlng = new google.maps.LatLng(
+            parseFloat(loc['lat']),
+            parseFloat(loc['lng']));
+
+          _self.create_marker(loc);
+          bounds.extend(latlng);
+          _self.map.fitBounds(bounds);
+        } else {
           for(var i in data['locations']) {
             var loc = data['locations'][i];
             var latlng = new google.maps.LatLng(
@@ -132,6 +153,7 @@ export class FM_Google_Map {
       }
     }
 
+    jQuery(_self.element).siblings('.fm-spinner-container').fadeOut();
   }
 
   create_marker(data) {
@@ -139,15 +161,19 @@ export class FM_Google_Map {
       parseFloat(data['lat']),
       parseFloat(data['lng']));
 
-    let marker = new google.maps.Marker({
+    let marker_options = {
       map: this.map,
       position: latlng,
       title: name,
       post_id: data.ID,
       html: '<div id="post-'+data.ID+'" class="fm-container">'+data.marker_html+'</div>',
-    });
+    };
 
-    var _self = this;
+    if(data.icon)
+      marker_options['icon'] = data.icon;
+
+    let marker = new google.maps.Marker(marker_options);
+    let _self = this;
 
     google.maps.event.addListener(marker, 'click', function() {
       _self.infoWindow.setContent(marker.html);

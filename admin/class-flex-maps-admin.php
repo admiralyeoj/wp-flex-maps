@@ -40,6 +40,9 @@ class Flex_Maps_Admin {
    */
   private $version;
 
+
+  protected $api;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -65,7 +68,7 @@ class Flex_Maps_Admin {
     if($post_type != 'flex_maps' && $post_type != 'fm_locations')
       return;
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'dist/css/index.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/bundle.min.css', array(), $this->version, 'all' );
 	}
 
 	/**
@@ -82,7 +85,7 @@ class Flex_Maps_Admin {
       return;
 
     // wp_enqueue_script( $this->plugin_name.'-google-map', plugin_dir_url( __FILE__ ) . '../public/js/FM-Google-Map.js', array( 'jquery', ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'dist/js/index.min.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/bundle.min.js', array( 'jquery' ), $this->version, false );
 
     wp_enqueue_script( $this->plugin_name.'-map-api', 'https://maps.googleapis.com/maps/api/js?key='.FLEX_MAPS_BROWSER_API_KEY.'&callback=FM_Init_Map', array( 'jquery', $this->plugin_name ), $this->version, true );
     
@@ -105,8 +108,10 @@ class Flex_Maps_Admin {
 
     $post_types->register_map_settings_post_type();
 
-    if($maybe_register_locations)
+    if($maybe_register_locations) {
       $post_types->register_location_post_type();
+      $post_types->register_stylist_post_type();
+    }
   }
 
   /**
@@ -124,10 +129,32 @@ class Flex_Maps_Admin {
     $settings_fields->register_fields();
   }
 
-  public function flex_maps_customize_menu() {
+
+  /*public function flex_maps_customize_menu() {
     global $submenu;
 
     add_submenu_page('edit.php?post_type=flex_maps', 'Add New Location', 'Add new Location', 'manage_options', 'post-new.php?post_type=fm_locations'); 
+
+
+    $taxonomies = get_object_taxonomies( 'fm_locations' );
+    if(!empty($taxonomies)) {
+      foreach ($taxonomies as $tax) {
+        add_submenu_page('edit.php?post_type=flex_maps', 'Taxonomy', 'Taxonomy', 'manage_options', "edit-tags.php?taxonomy={$tax}&post_type=flex_maps");
+      } 
+    }
   }
+
+  function taxonomy_parent_page( $parent_file ) {
+    $screen = get_current_screen();
+
+    // print_r($parent_file); exit;
+
+    $taxonomy = $screen->taxonomy;
+    if ( $screen->post_type == 'fm_locations' && ( $taxonomy == 'taxonomy' || $taxonomy == 'taxonomy2' || $taxonomy == 'taxonomy3' ) ) {
+      $parent_file = 'edit.php?post_type=flex_maps';
+    }
+
+    return $parent_file;
+  }*/
 
 }

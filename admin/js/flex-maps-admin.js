@@ -1,9 +1,4 @@
-import "./../css/acf-styles.css";
-import "./../../../public/src/css/marker.css";
-import "./../../../public/src/css/spinner.css";
-import "./../css/styles.css";
-
-import { FM_Google_Map } from './../../../includes/js/FM-Google-Map.js';
+import { FM_Google_Map } from 'FMGoogleMap';
 
 (function( $ ) {
 	'use strict';

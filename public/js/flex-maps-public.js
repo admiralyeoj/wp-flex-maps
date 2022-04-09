@@ -1,18 +1,14 @@
-import "./../css/location-element.css";
-import "./../css/spinner.css";
-import "./../css/marker.css";
-
-import { FM_Google_Map } from './../../../includes/js/FM-Google-Map.js';
+import { FM_Google_Map } from 'FMGoogleMap';
 
 (function( $ ) {
-	'use strict';
+  'use strict';
 
   // This enables you to define handlers, for when the DOM is ready:
   $(function() {
     
   });
 
-  $( window ).load(function() {
+  $( window ).on( 'load', function() {
 
   });
 
@@ -27,7 +23,7 @@ window.FM_Init_Map = () => {
   let map_divs = document.querySelectorAll(".fm-google-map");
   if(map_divs.length > 0) {
     map_divs.forEach(function(elem, index) {
-      let google_map = new FM_Google_Map(elem);
+      let google_map = new FM_Google_Map(elem, flex_map.map[elem.id].query);
     });
   }
 }

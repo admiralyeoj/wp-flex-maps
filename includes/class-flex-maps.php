@@ -72,9 +72,9 @@ class Flex_Maps {
     $this->define('FLEX_MAPS_PLUGIN_DIR', plugin_dir_path( dirname( __FILE__ ) ) );
     $this->define('FLEX_MAPS_PLUGIN_PATH', plugin_dir_url( dirname( __FILE__ ) ) );
     
-    $this->define('FLEX_MAPS_BROWSER_API_KEY', get_option('flex-maps_google_maps_browser_key', false));
-    $this->define('FLEX_MAPS_SERVER_API_KEY', get_option('flex-maps_google_maps_server_key', false));
-    $this->define('FLEX_MAPS_DEFAULT_RADIUS', get_option('flex-maps_radius', 25));
+    $this->define('FLEX_MAPS_BROWSER_API_KEY', get_option('flex_maps_google_maps_browser_key', false));
+    $this->define('FLEX_MAPS_SERVER_API_KEY', get_option('flex_maps_google_maps_server_key', false));
+    $this->define('FLEX_MAPS_DEFAULT_RADIUS', get_option('flex_maps_radius', 25) ?: 25);
 
 		$this->plugin_name = 'flex-maps';
 
@@ -193,28 +193,34 @@ class Flex_Maps {
     $global_settings = new Flex_Maps_Global_Setting();
     $settings = new Flex_Maps_Settings($this->get_plugin_name(), $this->get_version());
 
+    /* Admin */
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
     $this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
     $this->loader->add_action( 'acf/init', $plugin_admin, 'register_custom_fields' );
 
+    /* Global Settings */
     $this->loader->add_action( 'acf/init', $global_settings, 'register_settings_page' );
 
-
+    /* Map Settings */
     $this->loader->add_action( 'add_meta_boxes', $settings, 'example_map_section' );
     $this->loader->add_filter( 'acf/load_field/key=fm_field_rule_meta_key', $settings, 'load_fm_meta_keys');
-    $this->loader->add_action( 'acf/prepare_field/key=field_603b1807fa739', $settings, 'load_search_values');
 
-    $this->loader->add_action( 'acf/prepare_field/key=fm_repeater_rule_group', $settings, 'load_rule_group_repeater');
-    $this->loader->add_action( 'acf/prepare_field/key=fm_field_rule_meta_value', $settings, 'load_fm_meta_values');
+    $this->loader->add_filter( 'acf/load_field/key=fm_search_taxonomy_param_list', $settings, 'maybe_disable_taxonomy_filter', 5);
+    $this->loader->add_filter( 'acf/prepare_field/key=fm_custom_param_field', $settings, 'load_param_values');
+    $this->loader->add_filter( 'acf/prepare_field/key=fm_taxonomy_param_field', $settings, 'load_param_values');
+    $this->loader->add_filter( 'acf/validate_value/key=fm_custom_param_field', $settings, 'validate_field', 10, 4 );
+    $this->loader->add_filter( 'acf/validate_value/key=fm_taxonomy_param_field', $settings, 'validate_field', 10, 4 );
+    $this->loader->add_filter( 'acf/validate_value/key=fm_custom_param_name', $settings, 'validate_field', 10, 4 );
+    $this->loader->add_filter( 'acf/validate_value/key=fm_taxonomy_param_name', $settings, 'validate_field', 10, 4 );
+
+    $this->loader->add_filter( 'acf/prepare_field/key=fm_taxonomy_param_value', $settings, 'load_fm_tax_values');
+    
     $this->loader->add_action( 'acf/render_field/type=repeater', $settings, 'rule_group_repeater_before', 5);
     $this->loader->add_action( 'acf/render_field/key=fm_repeater_rule_group', $settings, 'rule_group_repeater_after', 15);
 
-    $this->loader->add_filter( 'wp_ajax_load_fm_rule_meta_values', $settings, 'ajax_load_fm_rule_meta_values');
-
-    /* Remove add new from Flex Map Settings */
-    $this->loader->add_action( 'admin_menu', $plugin_admin, 'flex_maps_customize_menu' );
+    $this->loader->add_filter( 'wp_ajax_load_fm_rule_tax_values', $settings, 'ajax_load_fm_rule_tax_values');
 	}
 
 	/**
